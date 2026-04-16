@@ -3,16 +3,15 @@ PYTHON=$(VENV)/bin/python
 PIP=$(VENV)/bin/pip
 
 install:
-	python3 -m venv $(VENV)
-	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
+	uv sync
 
-run:
-	$(PYTHON) main.py
+run: install
+	uv run python3 -m src
+
+debug:
+	uv run python3 -m pdb -m src
 
 clean:
-	rm -rf $(VENV) __pycache__ .pytest_cache
+	rm -rf .venv __pycache__ */__pycache__ .pytest_cache uv.lock
 
-re:
-	make clean
-	make install
+re: clean install
