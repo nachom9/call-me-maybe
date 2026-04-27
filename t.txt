@@ -1,0 +1,22 @@
+{'prompt': 'What is the sum of 2 and 3?'}
+fn_add_numbers
+{'prompt': 'What is the sum of 265 and 345?'}
+fn_add_numbers
+{'prompt': 'Greet shrek'}
+fn_greet
+{'prompt': 'Greet john'}
+fn_greet
+{'prompt': "Reverse the string 'hello'"}
+fn_reverse_string
+{'prompt': "Reverse the string 'world'"}
+fn_reverse_string
+{'prompt': 'What is the square root of 16?'}
+fn_get_square_root
+{'prompt': 'Calculate the square root of 144'}
+fn_get_square_root
+{'prompt': 'Replace all numbers in "Hello 34 I\'m 233 years old" with NUMBERS'}
+fn_add_numbers
+{'prompt': "Replace all vowels in 'Programming is fun' with asterisks"}
+fn_substitute_string_with_regex
+{'prompt': "Substitute the word 'cat' with 'dog' in 'The cat sat on the mat with another cat'"}
+fn_substitute_string_with_regex

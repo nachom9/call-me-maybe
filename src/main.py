@@ -1,47 +1,17 @@
 from llm_sdk import Small_LLM_Model
-import numpy as np
+import src.parser as parser
+import src.engine as engine
 
 
 def main():
     model = Small_LLM_Model()
 
-    prompt = """
-    You are a function calling system.
+    functions_definition, input, output = parser.parse_args()
+    functions = parser.parse_functions(functions_definition)
+    function_names = parser.parse_function_names(functions)
+    prompts = parser.parse_calls(input)
+    data = parser.Structure(output, functions, function_names, prompts)
+    engine.get_json(data, model)
 
-    You must choose exactly one function from the list and return ONLY valid JSON.
+    #print(prompt)
 
-    Available functions:
-
-    1. fn_add_numbers
-    - description: Add two numbers together
-    - parameters:
-        a: number
-        b: number
-
-    2. fn_reverse_string
-    - description: Reverse a string
-    - parameters:
-        s: string
-
-    3. fn_greet
-    - description: Greet a person by name
-    - parameters:
-        name: string
-
-    User request:
-    "What is the sum of 2 and 3?"
-
-    Return format (STRICT):
-    {
-    "name": "...",
-    "parameters": { ... }
-    }
-    """
-
-    for _ in range(100):
-        tokens = model.encode(prompt).tolist()[0]
-        logits = model.get_logits_from_input_ids(tokens)
-        next_token_id = int(np.argmax(logits))
-        decoded = model.decode([next_token_id])
-        prompt += decoded
-    print(prompt)
