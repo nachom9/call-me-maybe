@@ -3,11 +3,14 @@ import sys
 
 class Structure:
 
-    def __init__(self, output, functions, function_names, prompts):
+    def __init__(self, output, functions, function_names, prompts, parameters, functions_dict):
         self.output = output
         self.functions = functions
         self.function_names = function_names
         self.prompts = prompts
+        self.parameters = parameters
+        self.result = []
+        self.functions_dict = functions_dict
 
 def parse_args():
     args = sys.argv[1:]
@@ -43,7 +46,30 @@ def parse_function_names(functions):
     return function_names
 
 
+def get_functions_dict(functions):
+    functions_dict = {}
+    for function in functions:
+        functions_dict[function['name']] = function
+    return functions_dict
+
+
+def parse_parameters(functions):
+    parameters = {}
+
+    for function in functions:
+        parameters[function['name']] = []
+        for param in function['parameters']:
+            parameters[function['name']].append(param)
+
+    return parameters
+
 def parse_calls(path):
     with open(path, "r") as f:
         data = json.load(f)
-    return data
+
+    result = []
+    i = 0
+    for prompt in data:
+        result.append(data[i]['prompt'])
+        i += 1
+    return result
