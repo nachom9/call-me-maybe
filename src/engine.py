@@ -209,27 +209,35 @@ def get_parameters(data, model, input_prompt, function, json_str):
                 print(value)
             remaining_prompt = remaining_prompt.replace(str(value), "", 1)
             value = float(value.strip())
-
         elif param_type['type'] == 'string':
             prompt += '"'
             tokens = model.encode(prompt).tolist()[0]
             while True:
                 logits = model.get_logits_from_input_ids(tokens)
-                for token_id in range(len(logits)):
+                tmp = sorted(enumerate(logits), key = lambda item: item[1], reverse = True )
+                i = 0
+                for token_id, k in tmp:
                     if token_id >= len(text_tokens):
                         logits[token_id] = float("-inf")
                         continue
                     token = text_tokens[token_id].replace("Ġ", " ").replace("Ċ", "")
                     candidate = value + token
-                    if token == '"' and len(value) == 0:
+                    if i < 20:
+                        #print(token)
+                        i += 1
+                    if ((token == '"' and len(value) == 0) or
+                        (token == "'" and len(value) == 0) or
+                        (token == "'" and "'" not in value and '}' not in token) or
+                        (token == '"' and '"' not in value and '}' not in token)
+                    ):
                         logits[token_id] = float("-inf")
-                    if candidate not in input_prompt:
+                    if candidate not in input_prompt and '}' not in token:
                         logits[token_id] = float("-inf")
                     
                 next_token_id = int(np.argmax(logits))
                 tokens.append(next_token_id)
                 token = text_tokens[next_token_id].replace("Ġ", " ").replace("Ċ", "\n")
-                if '"' in token or np.all(np.isneginf(logits)):
+                if '"' in token or np.all(np.isneginf(logits)) or ('}' in token and '{' not in value):
                     print(f"rejected: {token}")
                     break
                 value += token
