@@ -113,25 +113,20 @@ def get_parameters(data, model, input_prompt, function, json_str):
     text_tokens = get_text_tokens(model)
     result = {}
     remaining_prompt = input_prompt
+    prompt = (
+        "You are a JSON filler.\n"
+        "Do not invent values.\n"
+        "Do not invent decimals.\n"
+        "Do not explain.\n"
+        "Do not repeat previous parameters.\n"
+        "Do not include surrounding text.\n"
+        f"Fill this JSON to call this function: {data.functions_dict[function]}:\n"
+
+        f'{json_str}'
+        )
 
     for p, param_type in params.items():
-        prompt = (
-            "Extract ONLY the exact parameter value from the user request.\n"
-            "Do not invent values.\n"
-            "Do not invent decimals.\n"
-            "Do not explain.\n"
-            "Do not repeat previous parameters.\n"
-            "Do not include surrounding text.\n"
-            "Copy the exact value from the request.\n\n"
-
-            f"User request: {input_prompt}\n"
-            f"Function: {function}\n"
-            f"Already extracted parameters: {result}\n"
-            f"Parameter name: {p}\n"
-            f"Parameter type: {param_type['type']}\n\n"
-
-            f'JSON:\n{json_str}"{p}":'
-        )
+        prompt += f'"{p}":'
 
         tokens = model.encode(prompt).tolist()[0]
         value = ""
@@ -208,7 +203,11 @@ def get_parameters(data, model, input_prompt, function, json_str):
                 value += token
                 print(value)
             remaining_prompt = remaining_prompt.replace(str(value), "", 1)
-            value = float(value.strip())
+            if not value:
+                print("No solution")
+            else:
+                value = float(value.strip())
+
         elif param_type['type'] == 'string':
             prompt += '"'
             tokens = model.encode(prompt).tolist()[0]
@@ -223,25 +222,28 @@ def get_parameters(data, model, input_prompt, function, json_str):
                     token = text_tokens[token_id].replace("Ġ", " ").replace("Ċ", "")
                     candidate = value + token
                     if i < 20:
-                        #print(token)
+                        print(f"token {i}: {token}")
                         i += 1
                     if ((token == '"' and len(value) == 0) or
                         (token == "'" and len(value) == 0) or
-                        (token == "'" and "'" not in value and '}' not in token) or
-                        (token == '"' and '"' not in value and '}' not in token)
+                        ('"' in token and token[0] != '"')
                     ):
                         logits[token_id] = float("-inf")
-                    if candidate not in input_prompt and '}' not in token:
-                        logits[token_id] = float("-inf")
-                    
+
                 next_token_id = int(np.argmax(logits))
                 tokens.append(next_token_id)
                 token = text_tokens[next_token_id].replace("Ġ", " ").replace("Ċ", "\n")
-                if '"' in token or np.all(np.isneginf(logits)) or ('}' in token and '{' not in value):
+                if token[0] == '"' or np.all(np.isneginf(logits)) or token[0] == '}' and '{' not in value:
                     print(f"rejected: {token}")
                     break
                 value += token
+                print(f"value: {value}")
             value = value.strip()
         result[p] = value
+
+        if param_type['type'] == 'string':
+            prompt += f'{value}",'
+        else:
+            prompt += f"{value},"
     
     return result
