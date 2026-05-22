@@ -6,12 +6,30 @@ install:
 	uv sync
 
 run: install
-	uv run python3 -m src
+	uv run python -m src
 
 debug:
-	uv run python3 -m pdb -m src
+	uv run python -m pdb -m src
 
 clean:
-	rm -rf .venv __pycache__ */__pycache__ .pytest_cache uv.lock
+	rm -rf \
+		__pycache__ \
+		*/__pycache__ \
+		.mypy_cache \
+		.pytest_cache \
+		.ruff_cache
+
+lint: install
+	uv run flake8 src
+	uv run mypy src \
+		--warn-return-any \
+		--warn-unused-ignores \
+		--ignore-missing-imports \
+		--disallow-untyped-defs \
+		--check-untyped-defs
+
+lint-strict:
+	uv run flake8 .
+	uv run mypy . --strict
 
 re: clean install
