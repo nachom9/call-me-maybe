@@ -6,7 +6,7 @@ Introduction to function calling in LLMs.
 
 ---
 
-# Description
+## Description
 
 This project implements a lightweight function-calling system using constrained decoding with a small language model.
 
@@ -21,7 +21,7 @@ The project focuses on understanding how modern function-calling systems work in
 
 ---
 
-# Features
+## Features
 
 - Function selection using constrained decoding.
 - Parameter extraction for:
@@ -37,7 +37,7 @@ The project focuses on understanding how modern function-calling systems work in
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```text
 .
@@ -55,9 +55,9 @@ The project focuses on understanding how modern function-calling systems work in
 └── README.md
 ```
 
-# Instructions
+## Instructions
 
-## Installation
+### Installation
 
 Install dependencies using:
 ```bash
@@ -67,7 +67,7 @@ or manually:
 ```bash
 uv sync
 ```
-## Running the Project
+### Running the Project
 
 Run the project using:
 ```bash
@@ -77,29 +77,29 @@ or:
 ```bash
 uv run python3 -m src
 ```
-## Debug Mode
+### Debug Mode
 
 Run the project using Python's debugger:
 ```bash
 make debug
 ```
 
-## Cleaning Temporary Files
+### Cleaning Temporary Files
 
 Remove cache and temporary files:
 ```bash
 make clean
 ```
-## Linting
+### Linting
 
 Run flake8 and mypy checks:
 ```bash
 make lint
 ```
 
-# Algorithm Explanation
+## Algorithm Explanation
 
-## Function Selection
+### Function Selection
 
 The project determines the target function using constrained token generation.
 
@@ -112,11 +112,11 @@ The token with the highest remaining probability is selected.
 
 This guarantees that the generated function name always matches one of the allowed schema definitions.
 
-## Parameter Extraction
+### Parameter Extraction
 
 Parameters are extracted one token at a time using constrained decoding.
 
-### The decoder:
+#### The decoder:
 
 Restricts valid tokens depending on parameter type.
 Validates partial candidates during generation.
@@ -131,7 +131,7 @@ Strings stop generation when a closing quote is reached.
 
 The implementation also removes already extracted values from the remaining prompt to reduce parameter duplication.
 
-## Logit Masking
+### Logit Masking
 
 The core mechanism of the project is logit masking.
 
@@ -142,17 +142,17 @@ Only valid candidates remain selectable.
 
 This transforms unconstrained language generation into deterministic structured generation.
 
-## Design Decisions
+### Design Decisions
 
 Several important design decisions were made during implementation.
 
-### Token-Level Control
+#### Token-Level Control
 
 The project avoids full free-form JSON generation because small language models often hallucinate or generate malformed outputs.
 
 Instead, generation is performed incrementally and constrained at every decoding step.
 
-## Schema-Driven Generation
+### Schema-Driven Generation
 
 Function schemas define:
 
@@ -162,7 +162,7 @@ allowed structures
 
 The model uses these schemas as generation constraints rather than relying only on prompting.
 
-## Deterministic Decoding
+### Deterministic Decoding
 
 The project uses argmax decoding instead of sampling.
 
@@ -186,7 +186,7 @@ token restriction logic
 
 and improves overall system reliability.
 
-## Performance Analysis
+### Performance Analysis
 Accuracy
 
 The system achieves strong accuracy on:
@@ -199,7 +199,7 @@ Accuracy improves significantly when aggressive token masking is applied.
 
 However, string extraction remains more difficult than numeric extraction because language tokens are less predictable and can contain formatting inconsistencies.
 
-### Speed
+#### Speed
 
 The implementation is relatively fast because:
 
@@ -209,7 +209,7 @@ no beam search is used
 
 Most prompts are processed within a small number of decoding steps.
 
-### Reliability
+#### Reliability
 
 Reliability is improved through:
 
@@ -220,11 +220,11 @@ prompt reduction after extraction
 
 Malformed JSON outputs are largely prevented through constrained generation.
 
-# Challenges Faced
+## Challenges Faced
 
 Several important challenges appeared during development.
 
-## Repeated Tokens
+### Repeated Tokens
 
 The model frequently repeated:
 
@@ -242,7 +242,7 @@ validating candidate values
 restricting repeated decimal points
 checking prompt consistency
 
-## Incorrect Numeric Extraction
+### Incorrect Numeric Extraction
 
 The model sometimes generated:
 
@@ -262,7 +262,7 @@ removing already extracted values
 validating incremental candidates
 improving token restrictions
 
-## String Termination
+### String Termination
 
 Strings occasionally missed:
 
@@ -272,7 +272,7 @@ punctuation
 
 Additional stopping conditions and token validation logic were added to improve extraction stability.
 
-# Type Checking with mypy
+## Type Checking with mypy
 
 Strict typing introduced several issues involving:
 
@@ -287,23 +287,23 @@ temporary typed variables
 typed containers
 Testing Strategy
 
-# The implementation was tested using multiple categories of prompts.
+## The implementation was tested using multiple categories of prompts.
 
-## Arithmetic Prompt examples
+### Arithmetic Prompt examples
 
 What is the product of 3 and 5?
 What is the product of 12 and 4?
 
-## Numeric Prompt examples
+### Numeric Prompt examples
 
 Calculate compound interest on 1234567.89 at 0.0375 rate for 23 years
 
-## String Prompt examples
+### String Prompt examples
 
 Execute SQL query 'SELECT * FROM users' on the production database
 Read C:\Users\john\config.ini with latin-1 encoding
 
-## These tests validated:
+### These tests validated:
 
 floating-point extraction
 decimal handling
@@ -317,7 +317,7 @@ escaping
 special characters
 filesystem paths
 
-## Example Usage
+### Example Usage
 
 Input:
 
@@ -335,7 +335,7 @@ Generated output:
     }
 }
 
-# Resources
+## Resources
 
 Documentation
 Python documentation:
@@ -354,7 +354,7 @@ https://huggingface.co/docs/transformers/main/en/generation_strategies
 Constrained decoding overview:
 https://lilianweng.github.io/posts/2021-01-02-controllable-text-generation/
 
-# AI Usage
+## AI Usage
 
 AI tools were used during development for:
 
