@@ -6,7 +6,23 @@ from llm_sdk.__init__ import Small_LLM_Model
 
 
 def get_json(data: Structure, model: Small_LLM_Model) -> None:
+    """
+    Generates the final JSON function-calling results for all prompts.
 
+    For each input prompt, this function:
+    - Determines the most suitable function name.
+    - Extracts the required parameters.
+    - Builds the final JSON structure.
+    - Appends the result to data.result.
+
+    Args:
+        data: Parsed project structure containing prompts, functions,
+            and output storage.
+        model: LLM SDK model instance used for token generation.
+
+    Returns:
+        None.
+    """
     for input_prompt in data.prompts:
         function = get_function_name(data, model, input_prompt)
 
@@ -27,6 +43,20 @@ def get_json(data: Structure, model: Small_LLM_Model) -> None:
 
 
 def get_text_tokens(model: Small_LLM_Model) -> list[str]:
+    """
+    Loads and reconstructs the tokenizer vocabulary list.
+
+    Converts the tokenizer JSON vocabulary into a list indexed by
+    token ID, allowing fast token-to-string lookup.
+
+    Args:
+        model: LLM SDK model instance.
+
+    Returns:
+        A list where each index corresponds to a token ID and
+        contains its decoded string representation.
+    """
+
     text_tokens = []
     path = model.get_path_to_vocab_file()
 
@@ -43,6 +73,20 @@ def get_text_tokens(model: Small_LLM_Model) -> list[str]:
 
 def get_function_name(data: Structure, model: Small_LLM_Model,
                       input_prompt: str) -> Any:
+    """
+    Determines the most suitable function for a user request.
+
+    Uses constrained token generation to restrict the model output
+    to valid function names defined in the schema.
+
+    Args:
+        data: Parsed project structure containing available functions.
+        model: LLM SDK model instance.
+        input_prompt: User request to analyze.
+
+    Returns:
+        The selected function name.
+    """
     prompt = (
         "Get the most suitable function name for this user request:\n"
         f"User request: {input_prompt}.\n"
@@ -75,6 +119,18 @@ def get_function_name(data: Structure, model: Small_LLM_Model,
 
 def is_valid_function_token(names: list[str], token: str,
                             current: str) -> bool:
+    """
+    Checks whether a token can continue building a valid function name.
+
+    Args:
+        names: List of valid function names.
+        token: Candidate token to append.
+        current: Current partially generated function name.
+
+    Returns:
+        True if at least one function name starts with the
+        concatenation of current and token, otherwise False.
+    """
     for f in names:
         if f.startswith(current + token):
             return True
@@ -84,6 +140,28 @@ def is_valid_function_token(names: list[str], token: str,
 def get_parameters(data: Structure, model: Small_LLM_Model,
                    input_prompt: str, function: str,
                    json_str: str) -> dict[str, Any]:
+    """
+    Extracts the parameters required for a selected function.
+
+    Uses constrained token-by-token generation with logit masking
+    to force the model to generate values matching the expected
+    parameter types defined in the function schema.
+
+    Supported parameter types:
+    - integer
+    - number
+    - string
+
+    Args:
+        data: Parsed project structure containing schemas and prompts.
+        model: LLM SDK model instance.
+        input_prompt: Original user request.
+        function: Selected function name.
+        json_str: Partial JSON string used as generation context.
+
+    Returns:
+        A dictionary containing the extracted parameters and values.
+    """
 
     params = data.functions_dict[function]['parameters']
     text_tokens = get_text_tokens(model)

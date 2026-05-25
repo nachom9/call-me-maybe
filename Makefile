@@ -28,8 +28,4 @@ lint: install
 		--disallow-untyped-defs \
 		--check-untyped-defs
 
-lint-strict:
-	uv run flake8 .
-	uv run mypy . --strict
-
 re: clean install

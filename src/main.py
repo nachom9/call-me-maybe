@@ -6,6 +6,21 @@ import os
 
 
 def main() -> None:
+    """
+    Main entry point of the project.
+
+    This function:
+    - Initializes the LLM model.
+    - Parses command-line arguments.
+    - Loads function definitions and prompts.
+    - Builds all required parsing structures.
+    - Executes the function-calling pipeline.
+    - Writes the generated results to the output JSON file.
+
+    Raises:
+        SystemExit: If parsing the input JSON files fails.
+    """
+
     model = Small_LLM_Model()
     try:
         functions_definition, input, output = parser.parse_args()
